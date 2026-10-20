@@ -10,6 +10,14 @@ import { getServerConfig } from '@/lib/config';
  */
 export async function POST() {
   const config = getServerConfig();
+  if (!process.env.AI_GATEWAY_API_KEY) {
+    // OIDC works for text models but not here: AI Gateway rejects client-secret
+    // minting without an API key (403 "Client secrets can only be minted with a Gateway API key").
+    return Response.json(
+      { error: 'AI_GATEWAY_API_KEY is not set. Realtime voice needs an AI Gateway API key.' },
+      { status: 500 },
+    );
+  }
   const { token, url, expiresAt } = await gateway.experimental_realtime.getToken({
     model: config.realtimeModel,
   });

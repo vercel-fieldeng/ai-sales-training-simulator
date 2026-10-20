@@ -11,6 +11,9 @@ export const DEPLOY_URL = `https://vercel.com/new/clone?${new URLSearchParams({
   'repository-url': REPO_URL,
   'project-name': 'ai-sales-training-simulator',
   'repository-name': 'ai-sales-training-simulator',
+  env: 'AI_GATEWAY_API_KEY',
+  envDescription: 'AI Gateway API key. Realtime voice client secrets can only be minted with an API key, not OIDC.',
+  envLink: 'https://vercel.com/docs/ai-gateway/authentication-and-byok',
   'demo-title': SITE.name,
   'demo-description': SITE.description,
 }).toString()}`;

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 vi.mock('@ai-sdk/gateway', () => ({
@@ -14,6 +14,7 @@ vi.mock('@ai-sdk/gateway', () => ({
 
 const { POST } = await import('@/app/api/realtime/token/route');
 
+beforeEach(() => vi.stubEnv('AI_GATEWAY_API_KEY', 'test-key'));
 afterEach(() => vi.unstubAllEnvs());
 
 describe('POST /api/realtime/token', () => {
@@ -29,5 +30,12 @@ describe('POST /api/realtime/token', () => {
   it('leaves the URL alone by default', async () => {
     const body = await (await POST()).json();
     expect(new URL(body.url).searchParams.has('extended-time')).toBe(false);
+  });
+
+  it('explains the missing API key instead of failing opaquely', async () => {
+    vi.stubEnv('AI_GATEWAY_API_KEY', '');
+    const response = await POST();
+    expect(response.status).toBe(500);
+    expect((await response.json()).error).toMatch(/AI_GATEWAY_API_KEY/);
   });
 });

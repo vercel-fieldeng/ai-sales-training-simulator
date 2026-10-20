@@ -6,7 +6,7 @@ The included scenario is a Medicare insurance call: a new agent talks to Margare
 
 ![AI Sales Training Simulator: two avatars for the trainee and the AI customer, a scenario brief, transcript and grading rubric](public/screenshot.png)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-fieldeng%2Fai-sales-training-simulator&project-name=ai-sales-training-simulator&repository-name=ai-sales-training-simulator&demo-title=AI+Sales+Training+Simulator&demo-description=Practice+live+sales+calls+with+an+AI+customer+over+realtime+voice%2C+then+get+an+evidence-backed+scorecard.)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-fieldeng%2Fai-sales-training-simulator&project-name=ai-sales-training-simulator&repository-name=ai-sales-training-simulator&env=AI_GATEWAY_API_KEY&envDescription=AI+Gateway+API+key.+Realtime+voice+client+secrets+can+only+be+minted+with+an+API+key%2C+not+OIDC.&envLink=https%3A%2F%2Fvercel.com%2Fdocs%2Fai-gateway%2Fauthentication-and-byok&demo-title=AI+Sales+Training+Simulator&demo-description=Practice+live+sales+calls+with+an+AI+customer+over+realtime+voice%2C+then+get+an+evidence-backed+scorecard.)
 
 ## Features
 
@@ -54,7 +54,9 @@ cp .env.example .env.local   # add AI_GATEWAY_API_KEY
 pnpm dev
 ```
 
-Open http://localhost:3000 and start a practice call. When deployed on Vercel, AI Gateway authenticates with OIDC, so no API key is needed.
+Open http://localhost:3000 and start a practice call.
+
+`AI_GATEWAY_API_KEY` is required locally and on Vercel. AI Gateway only mints realtime voice client secrets with an API key, not OIDC. Grading and summaries would work with OIDC alone, but the call itself needs the key. The Deploy button asks for it.
 
 ```bash
 pnpm test        # grading, handoff decisions, carryover, transcript, token route
