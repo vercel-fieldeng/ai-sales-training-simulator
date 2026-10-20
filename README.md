@@ -4,6 +4,8 @@ Practice live sales calls with an AI customer who talks back in real time, then 
 
 The included scenario is a Medicare insurance call: a new agent talks to Margaret, a cautious prospect about to turn 65. To train for a different product, swap the persona and the rubric.
 
+![AI Sales Training Simulator: two avatars for the trainee and the AI customer, a scenario brief, transcript and grading rubric](public/screenshot.png)
+
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-fieldeng%2Fai-sales-training-simulator&project-name=ai-sales-training-simulator&repository-name=ai-sales-training-simulator&demo-title=AI+Sales+Training+Simulator&demo-description=Practice+live+sales+calls+with+an+AI+customer+over+realtime+voice%2C+then+get+an+evidence-backed+scorecard.)
 
 ## Features
