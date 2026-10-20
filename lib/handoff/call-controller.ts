@@ -11,6 +11,7 @@ import { decideHandoff, isDeadlineClose } from './turn-gate';
 const TICK_MS = 250;
 const PREPARE_RETRY_MS = 5_000;
 const MAX_RECOVERIES = 3;
+const SPEAKING_EVENTS = new Set(['speech-started', 'speech-stopped', 'response-created', 'response-done']);
 
 export type CallPhase =
   | 'idle'
@@ -59,6 +60,8 @@ export interface CallSnapshot {
   turns: readonly Turn[];
   summary: string;
   grading: GradingState;
+  /** Who is talking right now on the active session. */
+  speaking: { trainee: boolean; customer: boolean };
   error?: string;
 }
 
@@ -454,6 +457,9 @@ export class CallController {
         break;
       }
     }
+
+    // Repaint speaking indicators right away instead of waiting for the next tick.
+    if (isActive && SPEAKING_EVENTS.has(event.type)) this.emit();
   }
 
   // --- carryover ------------------------------------------------------------
@@ -518,6 +524,10 @@ export class CallController {
       turns: this.transcript.all(),
       summary: this.summary,
       grading: this.grading,
+      speaking: {
+        trainee: this.traineeSpeaking,
+        customer: this.responseInFlight || (this.active?.session.isPlaying ?? false),
+      },
       error: this.error,
     };
   }

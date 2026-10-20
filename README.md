@@ -1,51 +1,48 @@
-# Realtime Voice Session Handoff
+# AI Sales Training Simulator
 
-Run voice calls that last longer than a single realtime session. This template simulates a sales training call. It hands the conversation to a fresh [AI Gateway](https://vercel.com/ai-gateway) realtime session between turns, keeps one speaker-labelled transcript across sessions, and grades the call when it ends.
+Practice live sales calls with an AI customer who talks back in real time, then get a scorecard when you hang up. Every score cites what was actually said on the call. Built with [AI Gateway](https://vercel.com/ai-gateway) realtime voice and the [AI SDK](https://ai-sdk.dev).
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-fieldeng%2Frealtime-session-handoff&project-name=realtime-session-handoff&repository-name=realtime-session-handoff&demo-title=Realtime+Voice+Session+Handoff&demo-description=Run+voice+calls+longer+than+a+single+realtime+session+on+AI+Gateway.)
+The included scenario is a Medicare insurance call: a new agent talks to Margaret, a cautious prospect about to turn 65. To train for a different product, swap the persona and the rubric.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-fieldeng%2Fai-sales-training-simulator&project-name=ai-sales-training-simulator&repository-name=ai-sales-training-simulator&demo-title=AI+Sales+Training+Simulator&demo-description=Practice+live+sales+calls+with+an+AI+customer+over+realtime+voice%2C+then+get+an+evidence-backed+scorecard.)
 
 ## Features
 
-- **Long calls on realtime voice.** Sessions are chained at a quiet moment between turns, so the caller hears one continuous conversation.
-- **Continuity across sessions.** Each new session gets the persona, a rolling summary, and the latest turns word for word, and keeps the same voice.
-- **One transcript.** Speaker labels come from the realtime session itself, so you don't need a diarization step.
-- **Grading when the call ends.** The transcript is sent to a grader that scores it against a rubric with structured output. Every judgment cites transcript turns, and the evidence is checked in code.
-- **Built on** Next.js, the [AI SDK](https://ai-sdk.dev) realtime API, and AI Gateway, with Geist for the UI.
+- **Realtime voice roleplay.** The trainee talks from the browser and the AI customer answers with low latency and natural interruptions. The customer stays in character, asks questions and pushes back.
+- **Automatic grading.** When the call ends, the transcript is scored against a rubric with compliance gates (pass/fail) and skill criteria (0–4), plus coaching notes.
+- **Evidence-backed scores.** Each judgment has to cite transcript lines. The app checks those citations in code and flags anything unsupported for human review.
+- **A speaker-labelled transcript.** Speaker labels come from the realtime session itself, so you don't need diarization.
+- **Long calls.** Calls can run longer than a single realtime session. See [How long calls work](#how-long-calls-work).
 
-## Why sessions need a handoff
+## How it works
 
-AI Gateway ends each realtime session at a fixed limit, closing with code 1001 about 13 minutes in. A training call, support call or interview can run longer. Reconnecting on its own doesn't help, because a new session starts with no memory and the caller hears a reset. This template makes the switch at a natural pause and carries the conversation over.
+1. **Brief.** The trainee sees the customer and their goals, then starts the call.
+2. **Talk.** The browser streams the microphone to an AI Gateway realtime session. The model plays the customer from the persona in `lib/handoff/persona.ts`.
+3. **Grade.** On hang-up, the transcript is POSTed to `/api/score`. A text model returns a structured grade. `lib/scoring/score.ts` validates the evidence, computes the overall score, and fails the call if a compliance gate fails.
+4. **Review.** The page shows the scorecard next to the transcript. In a production app, you'd also save the transcript and scorecard to your database.
 
-```
-session #1 ──────────────────────────────┐
-                 soft threshold          │ quiet moment
-                 │ summarize + pre-warm  │ ▼
-session #2       └──── connected, mic off ┴── mic on ─────────────── ...
-```
+## Customize it
 
-1. **Watch the clock.** Each session's age is measured from when it connected.
-2. **Prepare at the soft threshold.** Fold the transcript into a rolling summary, then connect the next session with carryover instructions and the microphone off.
-3. **Switch at a quiet moment.** Wait until the AI has finished speaking, the caller isn't talking, and the line has been quiet for 800 ms. Then move the microphone over and close the old session.
-4. **Force it at the hard threshold.** If nobody pauses, switch anyway and let the new session pick the thread back up. A clipped sentence beats being cut off by the server.
-5. **Recover.** If a session closes unexpectedly, promote the warm session or reconnect from the same carryover.
-
-When the call ends, the transcript is POSTed to `/api/score`. The page shows the payload and the scorecard that comes back.
-
-## Project structure
-
-| File | What it does |
+| To change | Edit |
 |---|---|
-| `lib/handoff/call-controller.ts` | The state machine: sessions, timing, mic handover, recovery, sending the transcript to grading |
-| `lib/handoff/turn-gate.ts` | Pure decision: wait, prepare, or switch |
-| `lib/handoff/carryover.ts` | Builds the next session's instructions |
-| `lib/handoff/transcript.ts` | One transcript across sessions |
-| `lib/handoff/realtime-session.ts` | A thin AI SDK session wrapper. `useRealtime` gives one session per hook, and a handoff needs two at once |
-| `lib/handoff/persona.ts` | The simulated customer. Swap in your own scenario |
-| `lib/scoring/rubric.ts` | Rubric, output schema and grader instructions (illustrative) |
-| `lib/scoring/score.ts` | Evidence validation and the final result |
-| `app/api/realtime/token/route.ts` | Mints a short-lived client secret per session |
-| `app/api/handoff/summary/route.ts` | The rolling summary used for carryover |
-| `app/api/score/route.ts` | Grades the finished call |
+| Who the customer is and how they behave | `lib/handoff/persona.ts` (`PERSONA_INSTRUCTIONS` and the `SCENARIO` brief) |
+| What gets graded | `lib/scoring/rubric.ts` (gates, criteria, grader instructions) |
+| Which models run the call, the summary and the grading | `.env.example` (`REALTIME_MODEL`, `SUMMARY_MODEL`, `SCORING_MODEL`) |
+
+The included rubric is an example. Have your training and compliance teams own the real criteria, especially any compliance gates.
+
+## How long calls work
+
+AI Gateway ends each realtime session at a fixed limit, about 13 minutes in, with close code 1001. A practice call can run longer, and simply reconnecting would start the customer over with no memory. So the app moves the conversation to a fresh session at a natural pause:
+
+1. **Prepare.** Near the limit, fold the transcript into a rolling summary and warm up a new session with the persona, the summary and the latest turns, with the microphone off.
+2. **Switch.** Wait until neither side is talking, then move the microphone to the new session and close the old one. The voice stays the same.
+3. **Force it.** If nobody pauses before the hard deadline, switch anyway and let the customer pick the thread back up.
+4. **Recover.** If a session closes unexpectedly, reconnect from the same carryover.
+
+The trainee hears one call, and the transcript and grading cover the whole thing. Open **Under the hood** on the page to watch it happen. The default timing hands off after about 90 seconds so you can see it quickly. For real calls, set `HANDOFF_SOFT_SECONDS=660` and `HANDOFF_HARD_SECONDS=740`.
+
+The handoff logic lives in `lib/handoff/` (`call-controller.ts`, `turn-gate.ts`, `carryover.ts`).
 
 ## Running locally
 
@@ -55,19 +52,29 @@ cp .env.example .env.local   # add AI_GATEWAY_API_KEY
 pnpm dev
 ```
 
-Open http://localhost:3000, start a call, and talk. With the default timing (`HANDOFF_SOFT_SECONDS=90`, `HANDOFF_HARD_SECONDS=150`) the first handoff happens after about 90 seconds, or press **Hand off at next pause**. For real calls, use `660` / `740`.
-
-When deployed on Vercel, AI Gateway authenticates with OIDC, so no API key is needed. See `.env.example` for model and timing settings.
+Open http://localhost:3000 and start a practice call. When deployed on Vercel, AI Gateway authenticates with OIDC, so no API key is needed.
 
 ```bash
-pnpm test        # turn gate, carryover, transcript, token route, scoring
+pnpm test        # grading, handoff decisions, carryover, transcript, token route
 pnpm typecheck
 ```
 
+## Project structure
+
+| File | What it does |
+|---|---|
+| `components/call.tsx` | The practice call UI: brief, transcript, grading, under the hood |
+| `components/call-stage.tsx` | The two avatars and speaking indicators |
+| `components/grading.tsx` | Rubric preview, payload sent, scorecard |
+| `lib/handoff/call-controller.ts` | Runs the call: sessions, microphone, long-call handoff, sending the transcript to grading |
+| `lib/scoring/` | Rubric, output schema, evidence validation |
+| `app/api/realtime/token/route.ts` | Mints a short-lived client secret per realtime session |
+| `app/api/score/route.ts` | Grades the finished call |
+| `app/api/handoff/summary/route.ts` | Rolling summary for long calls |
+
 ## Caveats
 
-- **Refreshing instructions at switch time.** Turns spoken while the next session was warming up are added with a second `session-update`. That works for OpenAI realtime models. Gemini Live closes the session with code 1008 if it gets a second `session-update`, so the app skips the refresh for `google/` models.
-- **The handoff is near-seamless, not perfect.** The new session has the conversation as text, not audio, so delivery can shift slightly, and a forced mid-turn switch can be heard.
-- **A connection can still drop during platform maintenance.** The recovery path covers that by reconnecting from the carryover.
-- **The rubric is an example.** Replace it with your own criteria, and have your compliance team own any compliance gates.
-- **`EXTENDED_TIME` stays off by default.** It opts in to longer sessions through an undocumented AI Gateway test feature with no stability guarantees.
+- **Grading uses the transcript only.** Tone, pace and confidence aren't scored.
+- **Long-call handoffs aren't perfect.** They're close to seamless, but the new session has the conversation as text, not audio. Delivery can shift slightly, and a forced mid-turn switch can be heard.
+- **Gemini models.** On `google/` realtime models the app skips a mid-call instructions refresh, because Gemini Live accepts only one `session-update` per session.
+- **`EXTENDED_TIME` stays off by default.** It opts in to ~30-minute sessions through an undocumented AI Gateway test feature with no stability guarantees.

@@ -23,6 +23,40 @@ export function Grading({
     <section className="panel">
       <h2>Grading</h2>
 
+      {grading.status === 'idle' && (
+        <>
+          <p className="muted">
+            When the call ends, the transcript is sent to <code>POST /api/score</code> and the agent is
+            graded against this rubric. Every judgment has to cite lines from the transcript.
+          </p>
+          <div className="rubric">
+            <div>
+              <h3>Compliance gates (pass / fail)</h3>
+              <ul>
+                {Object.entries(GATES).map(([id, text]) => (
+                  <li key={id}>
+                    <code>{id}</code>
+                    <span className="muted">{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3>Criteria (0-4)</h3>
+              <ul>
+                {Object.entries(CRITERIA).map(([id, text]) => (
+                  <li key={id}>
+                    <code>{id}</code>
+                    <span className="muted">{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <p className="muted">Illustrative rubric for the demo. Replace it with your own training and compliance criteria.</p>
+        </>
+      )}
+
       {payload && (
         <p className="muted">
           Call ended: sent {payload.turns.length} turns from {payload.sessions.length} session
@@ -121,7 +155,7 @@ function Evidence({ ids, byId }: { ids: string[]; byId: Map<string, Turn> }) {
         const turn = byId.get(id);
         return turn ? (
           <li key={id}>
-            <span className="muted">{turn.speaker === 'trainee' ? 'Agent' : 'Margaret'}:</span> “{turn.text}”
+            <span className="muted">{turn.speaker === 'trainee' ? 'You' : 'Margaret'}:</span> “{turn.text}”
           </li>
         ) : null;
       })}

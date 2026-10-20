@@ -1,3 +1,16 @@
+/** What the trainee sees before the call. Keep in sync with the persona below. */
+export const SCENARIO = {
+  customer: 'Margaret Ellis, 64',
+  situation:
+    'Turns 65 in three months and her employer coverage ends when she retires. Takes two daily prescriptions and wants to keep her cardiologist. Unsure whether Medicare Advantage or Medigap is right for her.',
+  goals: [
+    'Give the required plan disclaimer',
+    'Discover her needs before recommending anything',
+    'Explain her options accurately',
+    'Handle her concerns and agree a next step',
+  ],
+};
+
 /**
  * The simulated customer. Kept deliberately small: the point of this app is the
  * handoff mechanics, not the training scenario.

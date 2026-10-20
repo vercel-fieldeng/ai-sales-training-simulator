@@ -12,9 +12,8 @@ export default function Page() {
       <section className="hero">
         <h1>{SITE.name}</h1>
         <p>
-          A sales training call that outlasts a single realtime session. The app hands the
-          conversation to a fresh AI Gateway session between turns, so the trainee hears one
-          continuous call, and grades the transcript when the call ends.
+          Practice a live sales call with an AI customer who talks back in real time. When you hang
+          up, the call is graded against a rubric, with every score tied to what was actually said.
         </p>
         <div className="hero-actions">
           <a className="button" href={DEPLOY_URL}>

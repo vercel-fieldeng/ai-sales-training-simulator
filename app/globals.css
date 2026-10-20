@@ -94,3 +94,55 @@ code { font-size: 13px; }
 .items li { border-top: 1px solid var(--border); padding-top: 10px; font-size: 14px; }
 .items li p { margin: 4px 0; }
 .evidence { margin: 4px 0 0; padding-left: 16px; font-size: 13px; }
+
+/* Call stage: the two parties on the call */
+.stage { display: grid; grid-template-columns: 1fr minmax(120px, 1.2fr) 1fr; align-items: start; gap: 8px; padding: 8px 0 24px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.party { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+.avatar { position: relative; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 1px solid var(--border); color: var(--muted); transition: color 0.2s, border-color 0.2s; }
+.avatar.ai { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, var(--panel)), var(--panel)); }
+.is-live .avatar { color: var(--text); }
+.ring { position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; transform: scale(0.92); transition: opacity 0.2s, transform 0.2s; }
+.party.is-speaking .avatar { border-color: var(--accent); color: var(--accent); }
+.party.is-speaking .ring { opacity: 1; transform: scale(1); animation: ring-pulse 1.4s ease-out infinite; }
+.party-name { font-weight: 600; font-size: 15px; margin-top: 8px; }
+.party-role { color: var(--muted); font-size: 12px; }
+.bars { display: flex; align-items: flex-end; gap: 3px; height: 14px; margin-top: 6px; }
+.bars span { width: 3px; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.2s; }
+.party.is-speaking .bars span { background: var(--accent); animation: bar 0.9s ease-in-out infinite; }
+.party.is-speaking .bars span:nth-child(2) { animation-delay: 0.15s; }
+.party.is-speaking .bars span:nth-child(3) { animation-delay: 0.3s; }
+.party.is-speaking .bars span:nth-child(4) { animation-delay: 0.45s; }
+
+.link { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 30px; }
+.wire { width: 100%; height: 2px; border-radius: 1px; background: repeating-linear-gradient(90deg, var(--border) 0 6px, transparent 6px 12px); }
+.is-live .wire { background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 12px); background-size: 24px 2px; animation: flow 1.2s linear infinite; }
+.link-label { font-family: var(--font-geist-mono), ui-monospace, monospace; font-size: 12px; color: var(--muted); padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px; background: var(--panel); }
+
+@keyframes ring-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 100% { box-shadow: 0 0 0 12px transparent; } }
+@keyframes bar { 0%, 100% { height: 3px; } 50% { height: 14px; } }
+@keyframes flow { to { background-position: 24px 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .party.is-speaking .ring, .party.is-speaking .bars span, .is-live .wire { animation: none; }
+  .party.is-speaking .bars span { height: 10px; }
+}
+
+.rubric { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px; }
+.rubric ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rubric li { display: grid; gap: 2px; font-size: 13px; }
+.rubric li .muted { margin: 0; font-size: 13px; line-height: 1.4; }
+@media (max-width: 640px) { .rubric { grid-template-columns: 1fr; } }
+
+.scenario { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 14px; line-height: 1.5; }
+.scenario h3 { margin-top: 0; }
+.scenario p { margin: 0; }
+.scenario ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+@media (max-width: 640px) { .scenario { grid-template-columns: 1fr; } }
+
+.under-the-hood summary { display: flex; align-items: baseline; gap: 12px; cursor: pointer; list-style: none; }
+.under-the-hood summary::-webkit-details-marker { display: none; }
+.under-the-hood summary h2 { margin: 0; }
+.under-the-hood summary h2::before { content: '▸ '; }
+.under-the-hood[open] summary h2::before { content: '▾ '; }
+.under-the-hood[open] summary { margin-bottom: 12px; }
+.under-the-hood > p { font-size: 14px; line-height: 1.5; }
